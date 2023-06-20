@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<style>
+    #outcomes {
+      width: 200px; /* Измените значение для изменения ширины */
+      height: 40px; /* Измените значение для изменения высоты */
+      font-size: 16px; /* Измените значение для изменения размера шрифта */
+    }
+    .chart {
+      width: 95%; /* Измените значение для изменения ширины */
+      height: 100%; /* Измените значение для изменения высоты */
+      font-size: 16px; /* Измените значение для изменения размера шрифта */
+    }
+    #search {
+        display: flex;
+    }
+</style>
+<html>
+<head>
+  <title>Динамический график</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div id="search">
+        <select id="outcomes" onchange="ComboBoxChange()">
+            <option value="first">first</option>
+            <option value="draw">draw</option>
+            <option value="second">second</option>
+            <option value="firstOrDraw">firstOrDraw</option>
+            <option value="drawOrSecond">drawOrSecond</option>
+            <option value="score1">score1</option>
+            <option value="score1">score2</option>
+        </select>
+        <input type="text" id="input1" value="2525649354" onkeydown="handleKeyPress(event)">
+        <input type="text" id="input2" value="2525650756" onkeydown="handleKeyPress(event)">
+        <button onclick="search()">Поиск</button>
+        <label id="result"></label>
+    </div>
+  <div id="chart1" class="chart"></div>
+  <div id="chart2" class="chart"></div>
+
+  <script>
+    // Функция для получения данных графика через AJAX запрос
+    var data = [];
+    var chartData1 = [];
+    var chartData2 = [];
+    function handleKeyPress(event) {
+      if (event.keyCode === 13) search();
+    }
+    function search(){
+        var id1 = document.getElementById('input1').value;
+        var id2 = document.getElementById('input2').value;
+
+        document.getElementById('outcomes').value = 'first';
+        if (id1 && id2) fetchData(id1, id2);
+        else{
+            var result = document.getElementById('result');
+            result.textContent = 'ничего не найдено';
+        }
+    }
+
+    function ComboBoxChange(){
+        const comboBox = document.getElementById('outcomes');    
+        const selectedValue = comboBox.value;
+        console.log(selectedValue);
+        range = Math.max(Math.max(...data[0].map(obj => obj[selectedValue])), Math.max(...data[1].map(obj => obj[selectedValue])));
+        var layout = {
+            grid: {rows: 2, columns: 1},
+            title: 'История',
+            yaxis1: {range: [0, range]},
+            yaxis2: {range: [0, range]}
+            };
+          chartData1 = [{
+            x: data[0].map(obj => obj.now),
+            y: data[0].map(obj => obj[selectedValue]),
+            type: 'bar',
+            name: data[0].id,
+            xaxis: 'x1',
+            yaxis: 'y1'
+          },
+          {
+            x: data[1].map(obj => obj.now),
+            y: data[1].map(obj => obj[selectedValue]),
+            type: 'bar',
+            color: 'green',
+            xaxis: 'x2',
+            yaxis: 'y2'
+          }
+        ];
+
+          Plotly.newPlot('chart1', chartData1, layout);
+        
+    }
+    function fetchData(id1, id2) {
+      fetch(`/data?id1=${id1}&id2=${id2}`)
+        .then(response => response.json())
+        .then(data1 => {
+          var result = document.getElementById('result');
+          result.textContent = data1[2].replace(',', ',\n');
+          data = data1;
+          // Создание графика с полученными данными
+          range = Math.max(Math.max(...data[0].map(obj => obj.first)), Math.max(...data[1].map(obj => obj.first)));
+          var layout = {
+            grid: {rows: 2, columns: 1},
+            title: 'История',
+            yaxis1: {range: [0, range]},
+            yaxis2: {range: [0, range]}
+            };
+          chartData1 = [{
+            x: data[0].map(obj => obj.now),
+            y: data[0].map(obj => obj.first),
+            type: 'bar',
+            name: data[0].id,
+            xaxis: 'x1',
+            yaxis: 'y1'
+          },
+          {
+            x: data[1].map(obj => obj.now),
+            y: data[1].map(obj => obj.first),
+            type: 'bar',
+            color: 'green',
+            xaxis: 'x2',
+            yaxis: 'y2'
+          }
+        ];
+
+          Plotly.newPlot('chart1', chartData1, layout);
+        //   Plotly.newPlot('chart2', chartData2);
+        });
+    }
+
+    // Вызов функции fetchData при загрузке страницы
+    document.addEventListener('DOMContentLoaded', search);
+  </script>
+</body>
+</html>

@@ -9,8 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "canvas": "^2.11.2",
     "chart.js": "^4.3.0",
+    "express": "^4.18.2",
     "fs": "^0.0.1-security",
+    "nchart": "^1.0.1",
     "plotly.js": "^2.24.2",
     "plotly.js-dist": "^2.24.2",
     "sqlite3": "^5.1.6"
