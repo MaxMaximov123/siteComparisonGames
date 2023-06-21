@@ -1,0 +1,26 @@
+version: '3'
+services:
+  python-api:
+    build:
+      context: ./pythonApi
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - ./pythonApi:/app
+    networks:
+      - my-network
+
+  nodejs-api:
+    build:
+      context: ./Nodejs
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./Nodejs:/app
+    networks:
+      - my-network
+
+networks:
+  my-network:
