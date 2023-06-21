@@ -26,7 +26,7 @@ function copy(obj){
 
 function compare_names(name1, name2){
     return new Promise((resolve, reject) => {
-        const url = 'http://127.0.0.1:5000/api/names';  // Replace with your API endpoint
+        const url = 'http://localhost:5000/api/names';  // Replace with your API endpoint
 
         const data = {
             n1: name1,
