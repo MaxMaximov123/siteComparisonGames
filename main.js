@@ -158,6 +158,7 @@ function main(id1, id2) {
   });
 }
 
+
 if (require.main === module) {
     main()
       .then(result => {
