@@ -6,12 +6,33 @@
       font-size: 16px; /* Измените значение для изменения размера шрифта */
     }
     .chart {
-      width: 95%; /* Измените значение для изменения ширины */
+      width: 100%; /* Измените значение для изменения ширины */
       height: 100%; /* Измените значение для изменения высоты */
       font-size: 16px; /* Измените значение для изменения размера шрифта */
     }
     #search {
+        /* align-items: center; */
         display: flex;
+    }
+
+    table {
+      margin-bottom: 20px;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
     }
 </style>
 <html>
@@ -30,11 +51,33 @@
             <option value="score1">score1</option>
             <option value="score1">score2</option>
         </select>
-        <input type="text" id="input1" value="2525649354" onkeydown="handleKeyPress(event)">
-        <input type="text" id="input2" value="2525650756" onkeydown="handleKeyPress(event)">
+        <input type="text" id="input1" value="2709275962" onkeydown="handleKeyPress(event)">
+        <input type="text" id="input2" value="2710838059" onkeydown="handleKeyPress(event)">
         <button onclick="search()">Поиск</button>
+        <label>
+            <input type="checkbox" id="format" checked="1" onchange="format()">
+            форматировать
+          </label>
         <label id="result"></label>
     </div>
+    <table id="Table">
+        <caption>Результаты</caption>
+        <thead>
+            <tr>
+              <th></th>
+              <th>id</th>
+              <th>GlobalId</th>
+              <th>team1Name</th>
+              <th>team2Name</th>
+              <th>scores</th>
+              <th>sumOutcomes</th>
+              <th>comparNames</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+
+    </table>
   <div id="chart1" class="chart"></div>
   <div id="chart2" class="chart"></div>
 
@@ -46,12 +89,17 @@
     function handleKeyPress(event) {
       if (event.keyCode === 13) search();
     }
+    function format(){
+        var checkbox_state = document.getElementById("format").checked;
+        search();
+
+    }
+
     function search(){
         var id1 = document.getElementById('input1').value;
         var id2 = document.getElementById('input2').value;
 
-        document.getElementById('outcomes').value = 'first';
-        if (id1 && id2) fetchData(id1, id2);
+        if (id1 && id2) fetchData(id1, id2, document.getElementById("format").checked);
         else{
             var result = document.getElementById('result');
             result.textContent = 'ничего не найдено';
@@ -61,7 +109,6 @@
     function ComboBoxChange(){
         const comboBox = document.getElementById('outcomes');    
         const selectedValue = comboBox.value;
-        console.log(selectedValue);
         range = Math.max(Math.max(...data[0].map(obj => obj[selectedValue])), Math.max(...data[1].map(obj => obj[selectedValue])));
         var layout = {
             grid: {rows: 2, columns: 1},
@@ -70,7 +117,7 @@
             yaxis2: {range: [0, range]}
             };
           chartData1 = [{
-            x: data[0].map(obj => obj.now),
+            x: data[0].map(obj => obj.now % 100000),
             y: data[0].map(obj => obj[selectedValue]),
             type: 'bar',
             name: data[0].id,
@@ -78,7 +125,7 @@
             yaxis: 'y1'
           },
           {
-            x: data[1].map(obj => obj.now),
+            x: data[1].map(obj => obj.now % 100000),
             y: data[1].map(obj => obj[selectedValue]),
             type: 'bar',
             color: 'green',
@@ -90,40 +137,60 @@
           Plotly.newPlot('chart1', chartData1, layout);
         
     }
-    function fetchData(id1, id2) {
-      fetch(`/data?id1=${id1}&id2=${id2}`)
+    function fetchData(id1, id2, st) {
+      fetch(`/data?id1=${id1}&id2=${id2}&st=${st}`)
         .then(response => response.json())
         .then(data1 => {
-          var result = document.getElementById('result');
-          result.textContent = data1[2].replace(',', ',\n');
-          data = data1;
-          // Создание графика с полученными данными
-          range = Math.max(Math.max(...data[0].map(obj => obj.first)), Math.max(...data[1].map(obj => obj.first)));
-          var layout = {
-            grid: {rows: 2, columns: 1},
-            title: 'История',
-            yaxis1: {range: [0, range]},
-            yaxis2: {range: [0, range]}
-            };
-          chartData1 = [{
-            x: data[0].map(obj => obj.now),
-            y: data[0].map(obj => obj.first),
-            type: 'bar',
-            name: data[0].id,
-            xaxis: 'x1',
-            yaxis: 'y1'
-          },
-          {
-            x: data[1].map(obj => obj.now),
-            y: data[1].map(obj => obj.first),
-            type: 'bar',
-            color: 'green',
-            xaxis: 'x2',
-            yaxis: 'y2'
-          }
-        ];
+            data = data1;
 
-          Plotly.newPlot('chart1', chartData1, layout);
+            var tbody = document.querySelector("#Table tbody");
+            tbody.innerHTML = "";
+
+            var table = document.getElementById("Table");
+
+            // Получаем ссылку на tbody элемент таблицы
+            var tbody = table.getElementsByTagName("tbody")[0];
+
+            // Проходим по данным и создаем строки таблицы
+            var add_result = true;
+            for (var i = 0; i < 2; i++) {
+            // Создаем новую строку
+                console.log(data[i]);
+                var row = document.createElement("tr");
+
+                let cell1 = document.createElement("th");
+                cell1.textContent = 'game' + (i + 1);
+                row.appendChild(cell1);
+
+
+                // Создаем ячейки и заполняем данными
+                for (let col of ['id', 'globalGameId', 'team1Name', 'team2Name']){
+                    let cell = document.createElement("td");
+                    cell.textContent = data[i].at(-1)[col];
+                    row.appendChild(cell);
+                }
+                if (add_result){
+                    let cell = document.createElement("td");
+                    cell.textContent = data[2].scores;
+                    cell.rowSpan = 2;
+                    row.appendChild(cell);
+
+                    cell = document.createElement("td");
+                    cell.textContent = data[2].outcomes;
+                    cell.rowSpan = 2;
+                    row.appendChild(cell);
+
+                    cell = document.createElement("td");
+                    cell.textContent = data[2].names;
+                    cell.rowSpan = 2;
+                    row.appendChild(cell);
+
+                    add_result = false;
+                }
+
+                tbody.appendChild(row);
+            }
+            ComboBoxChange();
         //   Plotly.newPlot('chart2', chartData2);
         });
     }
