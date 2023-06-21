@@ -11,6 +11,8 @@ WORKDIR /app1
 COPY . .
 RUN npm init -y
 RUN npm i
+RUN npm install sqlite3
+
 
 # Определение команды запуска приложения
 CMD [ "node", "g.js" ]
