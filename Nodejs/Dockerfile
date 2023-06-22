@@ -11,9 +11,7 @@ WORKDIR /app1
 COPY . .
 RUN npm init -y
 RUN npm i
-RUN npm install sqlite3
-RUN npm install sqlite3 --build-from
-RUN npm install https://github.com/mapbox/node-sqlite3/tarball/master
+RUN npm install node-sqlite3
 
 # Определение команды запуска приложения
 CMD [ "node", "g.js" ]
