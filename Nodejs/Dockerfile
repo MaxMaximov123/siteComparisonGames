@@ -12,6 +12,7 @@ COPY . .
 RUN npm init -y
 RUN npm i
 RUN npm install sqlite3
+npm install sqlite3 --build-from
 
 
 # Определение команды запуска приложения
